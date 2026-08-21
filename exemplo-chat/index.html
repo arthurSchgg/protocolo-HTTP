@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Aplicação Cliente - Seminário HTTP</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px; margin: 5px; cursor: pointer; }
+        pre { background: #333; color: #0f0; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+
+    <h2>Painel do Cliente HTTP (Navegador)</h2>
+    <p>Abra o <b>F12 (DevTools) > aba Network/Rede</b> para ver as requisições acontecendo por baixo dos panos.</p>
+
+    <button onclick="requisicaoNormal()">1. GET: Sucesso (200)</button>
+    <button onclick="requisicaoPost()">2. POST: Inspecionar (201)</button>
+    <button onclick="lerHeaders()">3. GET: Ler Headers (Cache)</button>
+    <button onclick="provocarErro()">4. POST: Erro do Cliente (400)</button>
+
+    <h3>Resposta do Servidor:</h3>
+    <pre id="tela-resultado">Aguardando requisição...</pre>
+
+    <script>
+        const TELA = document.getElementById('tela-resultado');
+        const URL_BASE = 'http://localhost:8081';
+
+        // Função auxiliar para imprimir na tela
+        async function mostrarNaTela(response) {
+            const dados = await response.json();
+            TELA.innerText = `STATUS HTTP: ${response.status}\n\nCORPO (JSON):\n${JSON.stringify(dados, null, 2)}`;
+        }
+
+        // 1. Fazendo um GET simples
+        async function requisicaoNormal() {
+            TELA.innerText = "Carregando...";
+            const response = await fetch(`${URL_BASE}/`);
+            mostrarNaTela(response);
+        }
+
+        // 2. Fazendo um POST com Body e Headers customizados
+        async function requisicaoPost() {
+            TELA.innerText = "Carregando...";
+            const response = await fetch(`${URL_BASE}/inspecionar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Token-Seminario': '12345'
+                },
+                body: JSON.stringify({ aluno: "João", projeto: "HTTP" })
+            });
+            mostrarNaTela(response);
+        }
+
+        // 3. Lendo os Headers que o Java enviou
+        async function lerHeaders() {
+            TELA.innerText = "Carregando...";
+            const response = await fetch(`${URL_BASE}/cache`);
+            
+            // Capturando os headers específicos da resposta
+            const cacheInfo = response.headers.get('Cache-Control');
+            const headerSecreto = response.headers.get('X-Header-Seminario');
+            
+            const dados = await response.json();
+            
+            TELA.innerText = `STATUS HTTP: ${response.status}\n\nHEADERS RECEBIDOS:\nCache-Control: ${cacheInfo}\nX-Header-Seminario: ${headerSecreto}\n\nCORPO:\n${JSON.stringify(dados, null, 2)}`;
+        }
+
+        // 4. Provocando um erro proposital (Faltou o campo "nome")
+        async function provocarErro() {
+            TELA.innerText = "Carregando...";
+            const response = await fetch(`${URL_BASE}/erro-cliente`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ campo_errado: "vai dar erro" }) // Enviando JSON errado de propósito
+            });
+            mostrarNaTela(response);
+        }
+    </script>
+
+</body>
+</html>

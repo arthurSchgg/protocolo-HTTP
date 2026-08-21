@@ -1,0 +1,24 @@
+### 1. GET: Sucesso
+GET http://localhost:8081/
+
+### 2. POST: Inspecionar (Aqui não vai dar o erro 405!)
+POST http://localhost:8081/inspecionar
+Content-Type: application/json
+X-Header-Teste: Meu-Primeiro-Header
+
+{
+  "aluno": "João",
+  "projeto": "HTTP",
+  "mensagem": "Primeira tentativa"
+}
+
+### 3. GET: Ler Headers (Cache)
+GET http://localhost:8081/cache
+
+### 4. POST: Erro do Cliente (400 - Sem o campo nome)
+POST http://localhost:8081/erro-cliente
+Content-Type: application/json
+
+{
+  "campo_errado": "vai dar erro"
+}
